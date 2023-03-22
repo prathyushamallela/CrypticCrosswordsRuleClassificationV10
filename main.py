@@ -47,15 +47,12 @@ if __name__ == '__main__':
     # print("Timestamp is:", ts)
     filepath = "outputdata/sample" + str(ts) + "" + ".jsonl"
     counter = 0;
-    #with open('data/cryptonite-naive-split/cryptonite-naive-split-train.jsonl') as datafile:
-    #"C:\Users\prath\PycharmProjects\CrypticClassificationRuleApp\data\cryptonite-official-split\cryptonite-train.jsonl"
-    #"C:\Users\prath\PycharmProjects\CrypticClassificationRuleApp\data\cryptonite-official-split-not-enumerated\cryptonite-train-not-enumerated.jsonl"
-    #with open('data/cryptonite-official-split/cryptonite-train.jsonl') as datafile:
-    with open('data/cryptonite-official-split-not-enumerated/cryptonite-train-not-enumerated.jsonl') as datafile:
+    with open('data/cryptonite-official-split-not-enumerated/cryptonite-val-not-enumerated.jsonl') as datafile:
         for line in datafile:
             jsonline = json.loads(line)
             #print(jsonline['clue'])
-            cluename=jsonline['clue']
+            cluename_test=jsonline['clue']
+            cluename=cluename_test.replace('"','')
             answer=jsonline['answer']
             match=re.search(r'\d+',jsonline['enumeration']) #gives me the length of the clue answer
             answerlength=match.group()
@@ -64,6 +61,7 @@ if __name__ == '__main__':
             #print("{cluename:",cluename,"answer: ",answer, "--enumeration: ", answerlength)
             # each clue is of the type-> anagram, hidden-word, container, reversal, deletion, homophone, double-definition, charade, unclassified
             splitjsonline= jsonline['clue'].split(" ")
+            #a = a.replace('"', '')
             #print(splitjsonline)
             #rules for each of the clue type
             anagram_score = 0
@@ -74,7 +72,7 @@ if __name__ == '__main__':
             charade_score = 0
             hidden_word_score = 0
             double_definition_score = 0
-            unclassified_score = -1
+            unclassified_score = 0
 
             for word in splitjsonline:
                 for key, value in indicators.items():
@@ -94,7 +92,7 @@ if __name__ == '__main__':
                         elif key=='dd_':
                             double_definition_score+=1
                         else:
-                            unclassified_score=1
+                            unclassified_score+=1
 
             clue_scores={"anagram_score":anagram_score,"container_score":container_score,
             "reversal_score":reversal_score,"deletion_score":deletion_score,"homophone_score": homophone_score
@@ -112,33 +110,33 @@ if __name__ == '__main__':
             #print(highest.__getitem__(0))
             # for anagrams, if the anagram indicator words in clue are less than or equal to charade and dd as indicators for dd and charades are same,
             #we associate the clue to the charade. The charade can be charade plus anagram, charade plus container
-            if highest.__getitem__(0)=='anagram_score':
-                cluetype = 'anagram'
+            if highest.__getitem__(0)=="anagram_score":
+                cluetype = "anagram"
             #for container
-            elif highest.__getitem__(0)=='container_score':
-                cluetype = 'container'
+            elif highest.__getitem__(0)=="container_score":
+                cluetype = "container"
             #for reversal
-            elif highest.__getitem__(0)=='reversal_score':
-                cluetype = 'reversal'
+            elif highest.__getitem__(0)=="reversal_score":
+                cluetype = "reversal"
             #for deletion
-            elif highest.__getitem__(0)=='deletion_score':
-                cluetype = 'deletion'
+            elif highest.__getitem__(0)=="deletion_score":
+                cluetype = "deletion"
             #for homophone
-            elif highest.__getitem__(0)=='homophone_score':
-                cluetype = 'homophone'
+            elif highest.__getitem__(0)=="homophone_score":
+                cluetype = "homophone"
             #for charade
-            elif highest.__getitem__(0)=='charade_score':
-                cluetype = 'charade'
-            elif highest.__getitem__(0)=='hidden_word_score':
-                cluetype = 'hidden_word'
+            elif highest.__getitem__(0)=="charade_score":
+                cluetype = "charade"
+            elif highest.__getitem__(0)=="hidden_word_score":
+                cluetype = "hidden_word"
             #for double-definition
-            elif highest.__getitem__(0)=='double_definition_score':
-                cluetype = 'double_definition'
+            elif highest.__getitem__(0)=="double_definition_score":
+                cluetype = "double_definition"
             #for unclassified
             #elif highest.__getitem__(1)==0:
             #    cluetype = 'unclassified'
             else:
-                cluetype = 'unclassified'
+                cluetype = "unclassified"
 
             # Data to be written
             '''
@@ -152,13 +150,22 @@ if __name__ == '__main__':
                         double_definition_score = 0
                         unclassified_score = -1
                         '''
-            clueinfo = {"cluename": cluename,"answer": answer, "length": answerlength,"anagram_score": anagram_score,"container_score": container_score,"reversal_score" : reversal_score,"deletion_score" : deletion_score,"homophone_score" : homophone_score,"charade_score" :charade_score,"hidden_word_score":hidden_word_score,"double_definition_score":double_definition_score,"unclassified_score":unclassified_score,"predicted_cluetype":cluetype}
-            #print(clueinfo)
+            #clueinfo = {"cluename": cluename,"answer": answer, "length": answerlength,"anagram_score": anagram_score,"container_score": container_score,"reversal_score" : reversal_score,"deletion_score" : deletion_score,"homophone_score" : homophone_score,"charade_score" :charade_score,"hidden_word_score":hidden_word_score,"double_definition_score":double_definition_score,"unclassified_score":unclassified_score,"predicted_cluetype":cluetype}
+            #clueinfo ="{\"cluename\":\""+str(cluename)+"\",\"answer\":\""+str(answer)+"\",\"length\":\""+str(answerlength)+"\",\"anagram_score\":\""+str(anagram_score)+"\",\"container_score\":\""+str(container_score)+"\",\"reversal_score\":\""+str(reversal_score)+"\",\"deletion_score\":\""+str(deletion_score)+"\",\"homophone_score\":\""+str(homophone_score)+"\",\"charade_score\":\""+str(charade_score)+"\",\"hidden_word_score\":\""+str(hidden_word_score)+"\",\"double_definition_score\":\""+str(double_definition_score)+"\",\"unclassified_score\":\""+str(unclassified_score)+"\",\"predicted_cluetype\":\""+str(cluetype)+"\"}"
+            clueinfo = "{\"cluename\":\"" + str(cluename) + "\",\"answer\":\"" + str(answer) + "\",\"length\":" + str(
+                answerlength) + ",\"anagram_score\":" + str(anagram_score) + ",\"container_score\":" + str(
+                container_score) + ",\"reversal_score\":" + str(reversal_score) + ",\"deletion_score\":" + str(
+                deletion_score) + ",\"homophone_score\":" + str(homophone_score) + ",\"charade_score\":" + str(
+                charade_score) + ",\"hidden_word_score\":" + str(
+                hidden_word_score) + ",\"double_definition_score\":" + str(
+                double_definition_score) + ",\"unclassified_score\":" + str(
+                unclassified_score) + ",\"predicted_cluetype\":\"" + str(cluetype) + "\"}"
+            print(clueinfo)
             #writeToFile(clueinfo,filepath)
             #with open('outputdata/trainresult_'+str(ts)+'.jsonl', 'a') as f:
                 #f.write(str(clueinfo)+'\n')
 
-            with io.open('outputdata/cryptonite-train-not-enumerated_'+str(ts)+'.jsonl', 'a', encoding="utf-8") as f:
+            with io.open('out1/cryptonite-val-not-enumerated_'+str(ts)+'.jsonl', 'a', encoding="utf-8") as f:
                 f.write(str(clueinfo)+'\n')
             # Serializing json
             # filename.jsonl is the name of the file
